@@ -1,13 +1,13 @@
 import os
+import tempfile
 from flask import Flask, request, send_file
-# استيراد مكتبات المعالجة
 import ezdxf
 import fitz
 import pandas as pd
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+# استخدام المجلد المؤقت للنظام لضمان عدم حدوث خطأ في الكتابة
+UPLOAD_FOLDER = tempfile.gettempdir()
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -20,9 +20,9 @@ def index():
         file.save(path)
         out_path = os.path.join(UPLOAD_FOLDER, "Result.xlsx")
         
-        # معالجة بسيطة
         try:
-            if file.filename.endswith('.dxf'):
+            # معالجة الملفات
+            if file.filename.lower().endswith('.dxf'):
                 doc = ezdxf.readfile(path)
                 data = [{"Layer": e.dxf.layer} for e in doc.modelspace()]
             else:
@@ -32,16 +32,18 @@ def index():
             pd.DataFrame(data).to_excel(out_path, index=False)
             return send_file(out_path, as_attachment=True)
         except Exception as e:
-            return str(e), 500
+            return f"خطأ في المعالجة: {str(e)}", 500
             
     return """
     <html dir='rtl'><body>
         <h1>منصة الحصر الهندسي</h1>
         <form method='post' enctype='multipart/form-data'>
-            <input type='file' name='file'>
-            <input type='submit' value='معالجة الملف'>
+            <input type='file' name='file' accept='.dxf,.pdf'>
+            <input type='submit' value='بدء المعالجة'>
         </form>
     </body></html>
     """
 
-# لاحظ هنا: لا نحتاج لاستدعاء app.run() هنا لأن gunicorn سيتولى الأمر
+if __name__ == '__main__':
+    app.run()
+                
