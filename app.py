@@ -1,5 +1,5 @@
-from flask import Flask, request, send_file
 import os
+from flask import Flask, request, send_file
 import ezdxf
 import fitz
 import pandas as pd
@@ -17,10 +17,8 @@ def index():
         
         path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(path)
-        
         out_path = os.path.join(UPLOAD_FOLDER, "Result.xlsx")
         
-        # معالجة بسيطة
         try:
             if file.filename.endswith('.dxf'):
                 doc = ezdxf.readfile(path)
@@ -45,5 +43,6 @@ def index():
     """
 
 if __name__ == '__main__':
+    # لا تقم بتشغيل app.run() مباشرة في الإنتاج، gunicorn سيتولى ذلك
     app.run()
-                
+            
