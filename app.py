@@ -8,52 +8,42 @@ app = Flask(__name__)
 UPLOAD_FOLDER = 'uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-@app.route('/')
-def home():
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        if 'file' not in request.files: return "لا يوجد ملف", 400
+        file = request.files['file']
+        if file.filename == '': return "لم يتم اختيار ملف", 400
+        
+        path = os.path.join(UPLOAD_FOLDER, file.filename)
+        file.save(path)
+        
+        out_path = os.path.join(UPLOAD_FOLDER, "Result.xlsx")
+        
+        # معالجة بسيطة
+        try:
+            if file.filename.endswith('.dxf'):
+                doc = ezdxf.readfile(path)
+                data = [{"Layer": e.dxf.layer} for e in doc.modelspace()]
+            else:
+                doc = fitz.open(path)
+                data = [{"Page": i+1} for i in range(len(doc))]
+            
+            pd.DataFrame(data).to_excel(out_path, index=False)
+            return send_file(out_path, as_attachment=True)
+        except Exception as e:
+            return str(e), 500
+            
     return """
-    <html dir='rtl'>
-    <body style='text-align:center; padding-top:50px; font-family:sans-serif;'>
+    <html dir='rtl'><body>
         <h1>منصة الحصر الهندسي</h1>
-        <form action='/upload' method='post' enctype='multipart/form-data'>
-            <input type='file' name='file' required>
-            <button type='submit'>معالجة الملف</button>
+        <form method='post' enctype='multipart/form-data'>
+            <input type='file' name='file'>
+            <input type='submit' value='معالجة الملف'>
         </form>
-    </body>
-    </html>
+    </body></html>
     """
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return "لا يوجد ملف مرفوع", 400
-    file = request.files['file']
-    if file.filename == '':
-        return "لم يتم اختيار ملف", 400
-    
-    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
-    file.save(file_path)
-    
-    # تحديد مسار ملف الإكسل الناتج
-    output_path = os.path.join(UPLOAD_FOLDER, "Output_" + file.filename.rsplit('.', 1)[0] + ".xlsx")
-    
-    # معالجة بسيطة بناءً على نوع الملف
-    try:
-        if file.filename.lower().endswith('.dxf'):
-            doc = ezdxf.readfile(file_path)
-            # استخراج بيانات الطبقات كنموذج أولي للحصر
-            data = [{"Layer": e.dxf.layer} for e in doc.modelspace()]
-            pd.DataFrame(data).to_excel(output_path, index=False)
-        else:
-            # معالجة PDF
-            doc = fitz.open(file_path)
-            data = [{"Page": i+1} for i in range(len(doc))]
-            pd.DataFrame(data).to_excel(output_path, index=False)
-            
-        return send_file(output_path, as_attachment=True)
-    except Exception as e:
-        return f"حدث خطأ أثناء المعالجة: {str(e)}", 500
-
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
-    
+    app.run()
+                
