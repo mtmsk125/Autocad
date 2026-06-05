@@ -8,20 +8,35 @@ from fpdf import FPDF
 app = Flask(__name__)
 TEMP_DIR = tempfile.gettempdir()
 
-HTML_PAGE = """
+HTML_TEMPLATE = """
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head>
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>body{background:#f8f9fa; padding-top:50px; font-family: 'Segoe UI', sans-serif;}</style></head><body>
-<div class="container text-center">
-    <div class="card p-5 shadow">
-        <h1>نظام الحصر الهندسي المتكامل</h1>
-        <form method='post' enctype='multipart/form-data' class="mt-4">
-            <input type='file' name='file' class="form-control mb-3" accept='.dxf' required>
-            <button type='submit' class="btn btn-primary btn-lg">بدء المعالجة واستخراج التقارير</button>
-        </form>
+<html lang="ar" dir="rtl">
+<head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #ffffff; font-family: 'Segoe UI', sans-serif; }
+        .upload-zone { border: 2px dashed #007bff; border-radius: 20px; padding: 60px; text-align: center; background: #f8fbff; }
+        .btn-modern { background: #007bff; color: white; padding: 12px 40px; border-radius: 50px; font-weight: 600; border: none; }
+        .header-text { margin-bottom: 40px; margin-top: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header-text text-center">
+            <h2 class="fw-bold">نظام الحصر الهندسي المتكامل</h2>
+            <p class="text-muted">الاحترافية في استخراج الكميات وتدقيق المخططات</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form method='post' enctype='multipart/form-data' class="upload-zone">
+                    <input type='file' name='file' class="form-control mb-3" accept='.dxf' required>
+                    <button type='submit' class="btn btn-modern">بدء المعالجة الذكية</button>
+                </form>
+            </div>
+        </div>
     </div>
-</div></body></html>
+</body>
+</html>
 """
 
 @app.route('/', methods=['GET', 'POST'])
@@ -38,7 +53,7 @@ def index():
         for e in msp:
             if e.dxftype() == 'LWPOLYLINE' and not e.closed:
                 msp.add_circle(e.get_point_at(0), radius=0.5, dxfattribs={'color': 1})
-                errors.append({'خطأ': 'غير مغلق', 'موقع': str(e.get_point_at(0))})
+                errors.append({'ملاحظة': 'خط غير مغلق', 'إحداثيات': str(e.get_point_at(0))})
         
         marked_dxf = os.path.join(TEMP_DIR, "Checked.dxf")
         doc.saveas(marked_dxf)
@@ -51,11 +66,11 @@ def index():
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", 'B', 16)
-        pdf.cell(200, 10, txt="Project Report", ln=True, align='C')
+        pdf.cell(200, 10, txt="Project Engineering Report", ln=True, align='C')
         pdf.output(os.path.join(TEMP_DIR, "Report.pdf"))
         
-        return "تمت المعالجة بنجاح! <br><br> <a href='/download_dxf'>تحميل الأوتوكاد المصحح</a> <br> <a href='/download_excel'>تحميل الإكسل</a> <br> <a href='/download_pdf'>تحميل الـ PDF</a>"
-    return render_template_string(HTML_PAGE)
+        return "تمت المعالجة بنجاح! <br><br> <a href='/download_dxf'>تحميل الملف المصحح (DXF)</a> <br> <a href='/download_excel'>تحميل الإكسل</a> <br> <a href='/download_pdf'>تحميل الـ PDF</a>"
+    return render_template_string(HTML_TEMPLATE)
 
 @app.route('/download_dxf')
 def download_dxf(): return send_file(os.path.join(TEMP_DIR, "Checked.dxf"), as_attachment=True)
@@ -66,4 +81,4 @@ def download_pdf(): return send_file(os.path.join(TEMP_DIR, "Report.pdf"), as_at
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
-                
+        
