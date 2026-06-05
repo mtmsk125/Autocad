@@ -1,9 +1,5 @@
-Flask
-Flask-Login
-Flask-SQLAlchemy
+flask
 ezdxf
-PyMuPDF
 pandas
 openpyxl
-gunicorn
-stripe
+fpdf
