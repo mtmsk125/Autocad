@@ -1,84 +1,27 @@
-import os
-import tempfile
-from flask import Flask, request, send_file, render_template_string
+from flask import Flask, render_template, request, send_file
 import ezdxf
 import pandas as pd
 from fpdf import FPDF
+import os
+import tempfile
+from datetime import datetime
 
 app = Flask(__name__)
-TEMP_DIR = tempfile.gettempdir()
-
-HTML_TEMPLATE = """
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background-color: #ffffff; font-family: 'Segoe UI', sans-serif; }
-        .upload-zone { border: 2px dashed #007bff; border-radius: 20px; padding: 60px; text-align: center; background: #f8fbff; }
-        .btn-modern { background: #007bff; color: white; padding: 12px 40px; border-radius: 50px; font-weight: 600; border: none; }
-        .header-text { margin-bottom: 40px; margin-top: 50px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header-text text-center">
-            <h2 class="fw-bold">نظام الحصر الهندسي المتكامل</h2>
-            <p class="text-muted">الاحترافية في استخراج الكميات وتدقيق المخططات</p>
-        </div>
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <form method='post' enctype='multipart/form-data' class="upload-zone">
-                    <input type='file' name='file' class="form-control mb-3" accept='.dxf' required>
-                    <button type='submit' class="btn btn-modern">بدء المعالجة الذكية</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
-"""
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        file = request.files.get('file')
-        path = os.path.join(TEMP_DIR, file.filename)
-        file.save(path)
+        file = request.files['dxf_file']
+        if not file:
+            return "ارفع ملف DXF أولاً"
         
-        # 1. التدقيق البصري
-        doc = ezdxf.readfile(path)
-        msp = doc.modelspace()
-        errors = []
-        for e in msp:
-            if e.dxftype() == 'LWPOLYLINE' and not e.closed:
-                msp.add_circle(e.get_point_at(0), radius=0.5, dxfattribs={'color': 1})
-                errors.append({'ملاحظة': 'خط غير مغلق', 'إحداثيات': str(e.get_point_at(0))})
+        # مجلد مؤقت عشان Render
+        temp_dir = tempfile.mkdtemp()
+        filepath = os.path.join(temp_dir, file.filename)
+        file.save(filepath)
         
-        marked_dxf = os.path.join(TEMP_DIR, "Checked.dxf")
-        doc.saveas(marked_dxf)
+        errors_found = []
+        fixed_entities = []
         
-        # 2. الإكسل
-        excel_path = os.path.join(TEMP_DIR, "Report.xlsx")
-        pd.DataFrame(errors).to_excel(excel_path)
-        
-        # 3. الـ PDF
-        pdf = FPDF()
-        pdf.add_page()
-        pdf.set_font("Arial", 'B', 16)
-        pdf.cell(200, 10, txt="Project Engineering Report", ln=True, align='C')
-        pdf.output(os.path.join(TEMP_DIR, "Report.pdf"))
-        
-        return "تمت المعالجة بنجاح! <br><br> <a href='/download_dxf'>تحميل الملف المصحح (DXF)</a> <br> <a href='/download_excel'>تحميل الإكسل</a> <br> <a href='/download_pdf'>تحميل الـ PDF</a>"
-    return render_template_string(HTML_TEMPLATE)
-
-@app.route('/download_dxf')
-def download_dxf(): return send_file(os.path.join(TEMP_DIR, "Checked.dxf"), as_attachment=True)
-@app.route('/download_excel')
-def download_excel(): return send_file(os.path.join(TEMP_DIR, "Report.xlsx"), as_attachment=True)
-@app.route('/download_pdf')
-def download_pdf(): return send_file(os.path.join(TEMP_DIR, "Report.pdf"), as_attachment=True)
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get("PORT", 10000)))
-        
+        try:
+            doc = e
