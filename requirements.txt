@@ -3,4 +3,4 @@ gunicorn==21.2.0
 ezdxf==1.1.0
 numpy==1.24.3
 pandas==2.0.3
-reportlab==4.0.4
+fpdf2==2.7.6
