@@ -79,15 +79,13 @@ def index():
         with open(os.path.join(cd, 'index.html'), 'r', encoding='utf-8') as f_obj: 
             html = f_obj.read()
     except: 
-        return "index.html missing / ملف الواجهة مفقود بجانب الكود", 500
+        return "index.html missing", 500
 
-    # استبدال نقي وآمن تماماً للنصوص يتفادى محرك جينجا الخاطئ
     html = html.replace('USE_RESULT', res).replace('USE_DOWNLOAD_URL', d_url).replace('USE_JS_PTS', str(pts))
     return html
 
 if __name__ == '__main__':
     app.run(debug=True)
 
- 
-            
-          
+    
+  
