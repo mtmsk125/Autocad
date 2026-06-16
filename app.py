@@ -1,5 +1,4 @@
 from flask import Flask, request, send_file, render_template_string
-import urllib.request
 import ezdxf
 import os
 
@@ -7,64 +6,92 @@ app = Flask(__name__)
 
 @app.route('/download/<filename>')
 def download(filename):
-    p = os.path.join('/tmp', filename)
-    return send_file(p, as_attachment=True) if os.path.exists(p) else ("File not found", 404)
+    path = os.path.join('/tmp', filename)
+    if os.path.exists(path):
+        return send_file(path, as_attachment=True)
+    return "File not found", 404
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    res, f_name, pts = '', '', []
-    is_ar = 'ar' in request.headers.get('Accept-Language', '').lower()
+    result = ''
+    fixed_filename = ''
+    js_pts = []
+    
+    lang_header = request.headers.get('Accept-Language', '')
+    is_ar = 'ar' in lang_header.lower()
 
     if request.method == 'POST':
         try:
-            f = request.files.get('dxf_file')
-            if f and f.filename != '':
-                f_name = f.filename
-                fpath = os.path.join('/tmp', f_name)
-                f.save(fpath)
-                doc = ezdxf.readfile(fpath)
+            file = request.files.get('dxf_file')
+            if file and file.filename != '':
+                filename = file.filename
+                filepath = os.path.join('/tmp', filename)
+                file.save(filepath)
+
+                doc = ezdxf.readfile(filepath)
                 msp = doc.modelspace()
-                err = 0
+                errors = 0
+
                 for e in msp.query('LWPOLYLINE LINE'):
                     if e.dxftype() == 'LWPOLYLINE' and not e.closed:
-                        err += 1
+                        errors += 1
                         e.close()
                         if len(e) > 0:
                             p = e.get_points()
-                            pts.append({"x": float(p[0][0]), "y": float(p[0][1])})
+                            js_pts.append({"x": float(p), "y": float(p)})
                     elif e.dxftype() == 'LINE':
-                        err += 1
-                        pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
-                f_name = 'fixed_' + f_name
-                doc.saveas(os.path.join('/tmp', f_name))
-                os.remove(fpath)
-                
+                        errors += 1
+                        js_pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
+                        msp.add_circle(e.dxf.start, radius=1.0, dxfattribs={'color': 1})
+
+                fixed_filename = 'fixed_' + filename
+                doc.saveas(os.path.join('/tmp', fixed_filename))
+                os.remove(filepath)
+
                 if is_ar:
-                    res = f'''<div class="rc"><h3>✓ تم الفحص والإصلاح بنجاح!</h3><p>الأخطاء المصححة: <strong>{err}</strong></p><button type="button" onclick="openPaymentModal()" class="btn" style="background:#10b981;margin-top:10px;">تحميل ملف DXF السليم 🚀</button></div>'''
+                    result = f'<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>تم الفحص والإصلاح بنجاح!</h3><div class="error-counter">عدد الأخطاء المصلحة: <strong>{errors}</strong></div><p class="notice-text">شاهد خريطة الأخطاء المصلحة بالأسفل 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">تحميل ملف DXF السليم 🚀</button></div>'
                 else:
-                    res = f'''<div class="rc"><h3>✓ Scan & Fix Completed!</h3><p>Errors Fixed: <strong>{err}</strong></p><button type="button" onclick="openPaymentModal()" class="btn" style="background:#10b981;margin-top:10px;">Download Clean DXF 🚀</button></div>'''
-        except Exception as e: res = f'<div class="ec">⚠️ Error: {str(e)}</div>'
+                    result = f'<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>Scan & Fix Completed!</h3><div class="error-counter">Errors Fixed: <strong>{errors}</strong></div><p class="notice-text">See fixed errors highlighted below 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">Download Clean DXF 🚀</button></div>'
+            else:
+                result = '<div class="error-card">⚠️ File error</div>'
+        except Exception as e:
+            result = f'<div class="error-card">⚠️ Error: {str(e)}</div>'
 
-    # استدعاء الواجهة الفخمة والكاملة المخزنة سحابياً بأمان عبر مكتبة بايثون الأساسية
+    # قراءة الواجهة يدوياً من نفس المجلد لحل مشكلة قوالب جينجا وسجل الأخطاء
     try:
-        req = urllib.request.Request("https://pastebin.com", headers={'User-Agent': 'Mozilla/5.0'})
-        html_page = urllib.request.urlopen(req, timeout=5).read().decode('utf-8')
-    except:
-        return "Server Error / خطأ في السيرفر", 500
+        with open('index.html', 'r', encoding='utf-8') as f:
+            html_template = f.read()
+    except FileNotFoundError:
+        return "File index.html missing / ملف الواجهة مفقود", 500
 
-    d_url = f"/download/{f_name}" if f_name else "#"
+    download_url = f"/download/{fixed_filename}" if fixed_filename else "#"
     
-    # دمج البيانات والخيارات بذكاء وأمان داخل الصفحة السحابية الجاهزة
-    html_page = html_page.replace('USE_RESULT', res)
-    html_page = html_page.replace('USE_DOWNLOAD_URL', d_url)
-    html_page = html_page.replace('USE_JS_PTS', str(pts))
-    html_page = html_page.replace('USE_DIR', 'rtl' if is_ar else 'ltr')
-    html_page = html_page.replace('USE_LANG', 'ar' if is_ar else 'en')
+    # استبدال برمجي نقي وآمن مئة بالمئة يضمن عدم توقف السيرفر
+    html_template = html_template.replace('USE_RESULT', result)
+    html_template = html_template.replace('USE_DOWNLOAD_URL', download_url)
+    html_template = html_template.replace('USE_JS_PTS', str(js_pts))
+    html_template = html_template.replace('USE_DIR', 'rtl' if is_ar else 'ltr')
+    html_template = html_template.replace('USE_LANG', 'ar' if is_ar else 'en')
+    html_template = html_template.replace('USE_NAV', '🚀 أداة سحابية ذكية لماكينات الـ CNC' if is_ar else '🚀 Smart Cloud Tool for CNC')
+    html_template = html_template.replace('USE_H1', 'إصلاح وتنظيف ملفات DXF تلقائياً بضغطة زر' if is_ar else 'Auto-Fix DXF Files Instantly')
+    html_template = html_template.replace('USE_P', 'تكتشف منصتنا الأخطاء، وتسد الخطوط المفتوحة، وتجهز ملفك للقص الفوري وبأعلى دقة.' if is_ar else 'Our tool detects errors, closes open loops, and preps your file.')
+    html_template = html_template.replace('USE_LBL', 'اسحب ملف DXF هنا أو اضغط للتصفح' if is_ar else 'Drag & Drop DXF file here')
+    html_template = html_template.replace('USE_BTN', 'ابدأ الفحص والإصلاح التلقائي الآن' if is_ar else 'Start Auto-Scan & Repair Now')
+    html_template = html_template.replace('USE_MH3', '🔓 خطوة واحدة لتحميل ملفك الجاهز' if is_ar else '🔓 One Step to Download Your File')
+    html_template = html_template.replace('USE_MP', 'يرجى تحويل مبلغ 1 دينار أردني فقط عبر كليك لتفعيل التنزيل:' if is_ar else 'Please transfer 1 JOD via instant CliQ to unlock:')
+    html_template = html_template.replace('USE_VLBL', 'أدخل اسم المحوِّل للتأكيد والتنزيل:' if is_ar else 'Enter sender name to verify:')
+    html_template = html_template.replace('USE_VPH', 'مثال: محمد أحمد' if is_ar else 'e.g., John Doe')
+    html_template = html_template.replace('USE_VBTN', 'تأكيد وتحميل الملف فوراً 📥' if is_ar else 'Verify & Download Instantly 📥')
+    html_template = html_template.replace('USE_F1H', '⚡ إصلاح تلقائي فوري' if is_ar else '⚡ Instant Auto-Repair')
+    html_template = html_template.replace('USE_F1P', 'الخوارزمية تكتشف الخطوط المفتوحة وتقوم بإغلاقها تلقائياً.' if is_ar else 'The algorithm automatically detects and seals open loops.')
+    html_template = html_template.replace('USE_F2H', '🎯 تحديد دقيق للأخطاء' if is_ar else '🎯 Precise Error Tracking')
+    html_template = html_template.replace('USE_F2P', 'يتم رسم دوائر منبّهة حول أماكن المشاكل لتسهيل فحصها البصري.' if is_ar else 'Red alert circles are highlighted around problematic vectors.')
+    html_template = html_template.replace('USE_FOOTER', 'جميع الحقوق محفوظة © 2026 منصة DXF Fixer - الأردن.' if is_ar else 'All Rights Reserved © 2026 DXF Fixer.')
+    html_template = html_template.replace('USE_ALIGN', 'right' if is_ar else 'left')
 
-    return render_template_string(html_page)
+    return render_template_string(html_template)
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-
-             
+      
