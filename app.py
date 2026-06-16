@@ -1,5 +1,7 @@
 from flask import Flask, request, send_file, render_template_string
-import ezdxf, os, requests
+import urllib.request
+import ezdxf
+import os
 
 app = Flask(__name__)
 
@@ -28,8 +30,8 @@ def index():
                         err += 1
                         e.close()
                         if len(e) > 0:
-                            p = e.get_points()[0]
-                            pts.append({"x": float(p[0]), "y": float(p[1])})
+                            p = e.get_points()
+                            pts.append({"x": float(p[0][0]), "y": float(p[0][1])})
                     elif e.dxftype() == 'LINE':
                         err += 1
                         pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
@@ -43,10 +45,10 @@ def index():
                     res = f'''<div class="rc"><h3>✓ Scan & Fix Completed!</h3><p>Errors Fixed: <strong>{err}</strong></p><button type="button" onclick="openPaymentModal()" class="btn" style="background:#10b981;margin-top:10px;">Download Clean DXF 🚀</button></div>'''
         except Exception as e: res = f'<div class="ec">⚠️ Error: {str(e)}</div>'
 
-    # استدعاء الواجهة الفخمة والكاملة المخزنة سحابياً لمنع قص الكود نهائياً
+    # استدعاء الواجهة الفخمة والكاملة المخزنة سحابياً بأمان عبر مكتبة بايثون الأساسية
     try:
-        html_url = "https://pastebin.com" # رابط سحابي آمن ومخزن عليه الكود الكامل وثنائي اللغة
-        html_page = requests.get(html_url, timeout=5).text
+        req = urllib.request.Request("https://pastebin.com", headers={'User-Agent': 'Mozilla/5.0'})
+        html_page = urllib.request.urlopen(req, timeout=5).read().decode('utf-8')
     except:
         return "Server Error / خطأ في السيرفر", 500
 
@@ -63,5 +65,6 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
 
              
