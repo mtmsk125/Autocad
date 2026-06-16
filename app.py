@@ -37,8 +37,8 @@ def index():
                         errors += 1
                         e.close()
                         if len(e) > 0:
-                            p = e.get_points()
-                            js_pts.append({"x": float(p), "y": float(p)})
+                            p = e.get_points()[0]
+                            js_pts.append({"x": float(p[0]), "y": float(p[1])})
                     elif e.dxftype() == 'LINE':
                         errors += 1
                         js_pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
@@ -49,27 +49,33 @@ def index():
                 os.remove(filepath)
 
                 if is_ar:
-                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>تم الفحص والإصلاح التلقائي بنجاح!</h3><div class="error-counter">عدد الأخطاء المصلحة: <strong>{{errors}}</strong></div><p class="notice-text">شاهد خريطة الأخطاء المصلحة بالدوائر الحمراء في المعاين بالأسفل 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">تحميل ملف DXF السليم الآن 🚀</button></div>'''
+                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>تم الفحص والإصلاح بنجاح!</h3><div class="error-counter">عدد الأخطاء المصلحة: <strong>{errors}</strong></div><p class="notice-text">شاهد خريطة الأخطاء المصلحة بالدوائر الحمراء في المعاين بالأسفل 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">تحميل ملف DXF السليم الآن 🚀</button></div>'''
                 else:
-                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>Scan & Fix Completed!</h3><div class="error-counter">Errors Fixed: <strong>{{errors}}</strong></div><p class="notice-text">See fixed errors highlighted in red circles below 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">Download Clean DXF Now 🚀</button></div>'''
+                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>Scan & Fix Completed!</h3><div class="error-counter">Errors Fixed: <strong>{errors}</strong></div><p class="notice-text">See fixed errors highlighted in red circles below 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">Download Clean DXF Now 🚀</button></div>'''
             else:
                 result = '<div class="error-card">⚠️ File error / خطأ في الملف</div>'
         except Exception as e:
             result = f'<div id="result-section" class="error-card">⚠️ Error / خطأ: {str(e)}</div>'
 
-    # قراءة واجهة الموقع الكاملة كملف نصي مباشر لحل مشكلة السيرفر تماماً
+    # قراءة واجهة الموقع كملف نصي مباشر من نفس المجلد الرئيسي
     try:
         with open('index.html', 'r', encoding='utf-8') as f:
             html_template = f.read()
     except FileNotFoundError:
         return "File index.html missing / ملف الواجهة مفقود", 500
 
-    download_url = f"/download/{{fixed_filename}}" if fixed_filename else "#"
-    return render_template_string(html_template, result=result, download_url=download_url, js_pts=str(js_pts), is_ar=is_ar)
+    download_url = f"/download/{fixed_filename}" if fixed_filename else "#"
+    
+    # دمج البيانات بأمان لمنع أي خطأ برمي في السيرفر
+    html_template = html_template.replace('{{ result | safe }}', result)
+    html_template = html_template.replace('{{ download_url }}', download_url)
+    html_template = html_template.replace('{{ js_pts }}', str(js_pts))
+    html_template = html_template.replace('{{ is_ar_dir }}', 'rtl' if is_ar else 'ltr')
+    html_template = html_template.replace('{{ is_ar_lang }}', 'ar' if is_ar else 'en')
+    
+    return render_template_string(html_template)
 
 if __name__ == '__main__':
     app.run(debug=True)
 
-            
-
-    
+           
