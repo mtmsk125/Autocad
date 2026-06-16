@@ -1,71 +1,22 @@
-from flask import Flask, request, send_file, render_template_string
-import ezdxf
-import os
+<!DOCTYPE html><html dir="{% if is_ar %}rtl{% else %}ltr{% endif %}" lang="{% if is_ar %}ar{% else %}en{% endif %}"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>{% if is_ar %}منصة DXF Fixer | مصلح ملفات الـ CNC الذكي{% else %}DXF Fixer | Smart CNC & Laser Repair{% endif %}</title><style>:root{--p:#2563eb;--p-h:#1d4ed8;--d:#0f172a;--s:#10b981;--s-h:#059669;--bg:#f8fafc;--txt:#1e293b;--txt-m:#64748b;}body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--txt);margin:0;padding:0;text-align:center;}.navbar{background:#fff;padding:15px 5%;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 3px rgba(0,0,0,0.05);position:sticky;top:0;z-index:100;}.logo{font-size:20px;font-weight:800;color:var(--d);}.logo span{color:var(--p);}.nav-links{font-size:14px;color:var(--txt-m);}.hero{background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);color:#fff;padding:50px 5% 120px;}.hero h1{font-size:30px;font-weight:800;margin-bottom:12px;}.hero p{font-size:15px;color:#cbd5e1;max-width:650px;margin:0 auto;line-height:1.6;}.wrap{max-width:580px;margin:-80px auto 40px;padding:0 20px;box-sizing:border-box;}.ctr{background:#fff;padding:35px 30px;border-radius:20px;box-shadow:0 20px 25px -5px rgba(0,0,0,0.1);}.ua{border:2px dashed #3498db;padding:45px 20px;border-radius:14px;cursor:pointer;background:#f8fafc;position:relative;}.ua input[type="file"]{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0;cursor:pointer;z-index:10;}.btn-s{padding:14px;background:var(--p);color:#fff;border:none;border-radius:10px;font-size:16px;cursor:pointer;font-weight:600;margin-top:20px;width:100%;}.btn-s:hover{background:var(--p-h);}.rc{margin-top:25px;padding:25px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:14px;}.success-icon{width:40px;height:40px;background:var(--s);color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;font-weight:bold;}.btn-d{padding:14px;background:var(--s);color:#fff;border:none;border-radius:10px;font-size:17px;cursor:pointer;font-weight:bold;width:100%;}.btn-d:hover{background:var(--s-h);}.ec{margin-top:20px;padding:15px;background:#fef2f2;border:1px solid #fca5a5;border-radius:10px;color:#991b1b;}.pb{display:none;background:#fff;max-width:580px;margin:20px auto 40px;padding:20px;border-radius:20px;box-shadow:0 10px 15px rgba(0,0,0,0.05);}.cc{width:100%;height:260px;background:#111827;border-radius:12px;position:relative;overflow:hidden;}.features{max-width:850px;margin:30px auto 60px;display:grid;grid-template-columns:repeat(auto-fit, minmax(240px,1fr));gap:20px;padding:0 20px;}.f-card{background:#fff;padding:22px;border-radius:12px;box-shadow:0 4px 6px rgba(0,0,0,0.05);text-align:{% if is_ar %}right{% else %}left{% endif %};}.footer{background:var(--d);color:#94a3b8;padding:25px;font-size:13px;}.md{display:none;position:fixed;z-index:1000;left:0;top:0;width:100%;height:100%;background:rgba(15,23,42,0.6);backdrop-filter:blur(3px);}.mc{background:#fff;margin:12% auto;padding:30px;border-radius:16px;width:85%;max-width:400px;position:relative;box-sizing:border-box;text-align:{% if is_ar %}right{% else %}left{% endif %};}.cb{position:absolute;top:15px;{% if is_ar %}left:20px;{% else %}right:20px;{% endif %}font-size:24px;cursor:pointer;color:#94a3b8;}.p-box{background:#f8fafc;padding:15px;border-radius:12px;border-{% if is_ar %}right{% else %}left{% endif %}:5px solid var(--s);margin:15px 0;text-align:center;}.num{color:var(--s);font-size:22px;font-weight:700;display:block;margin-top:5px;}.iv{width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:8px;margin-bottom:15px;text-align:center;font-size:16px;box-sizing:border-box;}</style></head><body>
+    <div class="navbar"><div class="logo">🛠️ DXF<span>Fixer</span></div><div class="nav-links">{% if is_ar %}🚀 أداة سحابية ذكية لماكينات الـ CNC{% else %}🚀 Smart Cloud Tool for CNC & Laser{% endif %}</div></div>
+    <div class="hero"><h1>{% if is_ar %}إصلاح وتنظيف ملفات DXF تلقائياً بضغطة زر{% else %}Auto-Fix & Clean DXF Files Instantly{% endif %}</h1><p>{% if is_ar %}تجنب هدر المواد وضياع الوقت على الماكينة. تكتشف منصتنا الأخطاء، وتسد الخطوط المفتوحة، وتجهز ملفك للقص الفوري وبأعلى دقة.{% else %}Avoid material waste and machine downtime. Our platform detects errors, closes open loops, and prepares your file for flawless cutting.{% endif %}</p></div>
+    <div class="wrap"><div class="ctr"><form method="POST" enctype="multipart/form-data"><div class="ua"><div style="font-size:40px;">📥</div><div id="fl">{% if is_ar %}اسحب ملف DXF هنا أو اضغط للتصفح{% else %}Drag & Drop DXF file here or Click to browse{% endif %}</div><input type="file" name="dxf_file" accept=".dxf" required onchange="uFN(this)"></div><button type="submit" class="btn-s">{% if is_ar %}ابدأ الفحص والإصلاح التلقائي الآن{% else %}Start Auto-Scan & Repair Now{% endif %}</button></form>{{ result | safe }}</div></div>
+    <div id="vpb" class="pb"><h4 style="text-align:center;margin:0 0 10px;">{% if is_ar %}🔍 خريطة ومعاينة الأخطاء المصلحة تلقائياً{% else %}🔍 Live Fixed Errors Map (Visual Preview){% endif %}</h4><div class="cc" id="c-ctr"></div></div>
+    <div class="features">
+        <div class="f-card"><h4>⚡ {% if is_ar %}إصلاح تلقائي فوري{% else %}Instant Auto-Repair{% endif %}</h4><p>{% if is_ar %}الخوارزمية الذكية تكتشف الخطوط المفتوحة وتقوم بإغلاقها ومعالجتها أوتوماتيكياً في ثوانٍ.{% else %}The smart algorithm automatically detects open loops and seals them in just a few seconds.{% endif %}</p></div>
+        <div class="f-card"><h4>🎯 {% if is_ar %}تحديد دقيق للأخطاء{% else %}Precise Error Tracking{% endif %}</h4><p>{% if is_ar %}يتم رسم دوائر حمراء منبّهة حول أماكن المشاكل والقطع غير المتصلة لتسهيل فحصها البصري.{% else %}Red alert circles are highlighted around problematic vectors for easy identification.{% endif %}</p></div>
+    </div>
+    <div class="footer">{% if is_ar %}جميع الحقوق محفوظة © 2026 منصة DXF Fixer - أداة ذكية مخصصة لخدمة ورش الـ CNC بالأردن.{% else %}All Rights Reserved © 2026 DXF Fixer Platform - Specialized smart tool for CNC cutting workshops.{% endif %}</div>
+    <div id="pM" class="md"><div class="mc"><span class="cb" onclick="cPM()">&times;</span><h3 style="text-align:center;">{% if is_ar %}🔓 خطوة واحدة لتحميل ملفك الجاهز{% else %}🔓 One Step to Download Your File{% endif %}</h3><p style="font-size:13px;color:var(--txt-m);text-align:center;">{% if is_ar %}يرجى تحويل مبلغ <strong>1 دينار أردني فقط</strong> عبر كليك الفوري المباشر لتفعيل التنزيل:{% else %}To support the server, please transfer <strong>1 JOD (or ~$1.5 USD)</strong> via instant CliQ:{% endif %}</p>
+        <div class="p-box"><strong>🏦 {% if is_ar %}الحوالة المباشرة عبر كليك (CliQ){% else %}Instant Transfer via CliQ{% endif %}</strong><span class="num">00962795156768</span></div>
+        <div style="margin-top:15px;border-top:1px solid #e2e8f0;padding-top:15px;"><label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px;">{% if is_ar %}أدخل اسم المحوِّل للتأكيد وتفعيل التحميل:{% else %}Enter sender name to verify and unlock:{% endif %}</label><input type="text" id="bI" class="iv" placeholder="{% if is_ar %}مثال: محمد أحمد / 079xxxxxxx{% else %}e.g., John Doe / Phone Number{% endif %}"><button type="button" onclick="vAD()" class="btn-s" style="margin-top:0;">{% if is_ar %}تأكيد وتحميل الملف فوراً 📥{% else %}Verify & Download Instantly 📥{% endif %}</button></div>
+    </div></div>
+    <script>
+        function uFN(i){{var l=document.getElementById('fl');if(i.files&&i.files.length>0){{l.innerText="{% if is_ar %}تم اختيار: {% else %}Selected: {% endif %}"+i.files[0].name;l.style.color="var(--p)";}}}}
+        function openPaymentModal(){{document.getElementById('pM').style.display='block';}} function closePaymentModal(){{document.getElementById('pM').style.display='none';}}
+        function vAD(){{var v=document.getElementById('bI').value.trim();if(v===""){{alert("{% if is_ar %}الرجاء إدخال تفاصيل التأكيد.{% else %}Please enter verification details.{% endif %}");}}else{{window.location.href="{{ download_url }}";closePaymentModal();}}}}
+        window.onclick=function(e){{var m=document.getElementById('pM');if(e.target==m){{m.style.display="none";}}}}
+        var pts={{ js_pts | safe }};if(pts.length>0){{document.getElementById('vpb').style.display='block';var c=document.getElementById('c-ctr');pts.forEach(function(p){{var d=document.createElement('div');d.style.position='absolute';d.style.width='12px';d.style.height='12px';d.style.background='#ef4444';d.style.borderRadius='50%';d.style.boxShadow='0 0 10px #ef4444';d.style.left=(Math.abs(p.x*25)%(c.clientWidth-40)+20)+'px';d.style.top=(Math.abs(p.y*25)%(c.clientHeight-40)+20)+'px';d.style.animation='bk 1s infinite alternate';c.appendChild(d);}});var s=document.createElement('style');s.innerHTML='@keyframes bk{{from{{opacity:0.3;transform:scale(0.9);}}to{{opacity:1;transform:scale(1.2);}}}}';document.head.appendChild(s);}}
+    </script></body></html>
 
-app = Flask(__name__)
-
-@app.route('/download/<filename>')
-def download(filename):
-    path = os.path.join('/tmp', filename)
-    if os.path.exists(path):
-        return send_file(path, as_attachment=True)
-    return "File not found", 404
-
-@app.route('/', methods=['GET', 'POST'])
-def index():
-    result = ''
-    fixed_filename = ''
-    js_pts = []
-    
-    lang_header = request.headers.get('Accept-Language', '')
-    is_ar = 'ar' in lang_header.lower()
-
-    if request.method == 'POST':
-        try:
-            file = request.files.get('dxf_file')
-            if file and file.filename != '':
-                filename = file.filename
-                filepath = os.path.join('/tmp', filename)
-                file.save(filepath)
-
-                doc = ezdxf.readfile(filepath)
-                msp = doc.modelspace()
-                errors = 0
-
-                for e in msp.query('LWPOLYLINE LINE'):
-                    if e.dxftype() == 'LWPOLYLINE' and not e.closed:
-                        errors += 1
-                        e.close()
-                        if len(e) > 0:
-                            p = e.get_points()
-                            js_pts.append({"x": float(p), "y": float(p)})
-                    elif e.dxftype() == 'LINE':
-                        errors += 1
-                        js_pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
-                        msp.add_circle(e.dxf.start, radius=1.0, dxfattribs={'color': 1})
-
-                fixed_filename = 'fixed_' + filename
-                doc.saveas(os.path.join('/tmp', fixed_filename))
-                os.remove(filepath)
-
-                if is_ar:
-                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>تم الفحص والإصلاح التلقائي بنجاح!</h3><div class="error-counter">عدد الأخطاء المصلحة: <strong>{{errors}}</strong></div><p class="notice-text">شاهد خريطة الأخطاء المصلحة بالدوائر الحمراء في المعاين بالأسفل 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">تحميل ملف DXF السليم الآن 🚀</button></div>'''
-                else:
-                    result = f'''<div id="result-section" class="result-card"><div class="success-icon">✓</div><h3>Scan & Fix Completed!</h3><div class="error-counter">Errors Fixed: <strong>{{errors}}</strong></div><p class="notice-text">See fixed errors highlighted in red circles below 👇</p><button type="button" onclick="openPaymentModal()" class="btn-download">Download Clean DXF Now 🚀</button></div>'''
-            else:
-                result = '<div class="error-card">⚠️ File error / خطأ في الملف</div>'
-        except Exception as e:
-            result = f'<div id="result-section" class="error-card">⚠️ Error / خطأ: {str(e)}</div>'
-
-    # قراءة واجهة الموقع الكاملة كملف نصي مباشر لحل مشكلة السيرفر تماماً
-    try:
-        with open('index.html', 'r', encoding='utf-8') as f:
-            html_template = f.read()
-    except FileNotFoundError:
-        return "File index.html missing / ملف الواجهة مفقود", 500
-
-    download_url = f"/download/{{fixed_filename}}" if fixed_filename else "#"
-    return render_template_string(html_template, result=result, download_url=download_url, js_pts=str(js_pts), is_ar=is_ar)
-
-if __name__ == '__main__':
-    app.run(debug=True)
