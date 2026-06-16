@@ -35,7 +35,7 @@ def index():
                     e.close()
                     points = e.get_points()
                     if points:
-                        first_pt = points[0]
+                        first_pt = points
                         pts.append({"x": float(first_pt[0]), "y": float(first_pt[1])})
                 elif e.dxftype() == 'LINE':
                     err += 1
@@ -86,10 +86,7 @@ def index():
     html = html.replace('USE_F2H', '🎯 خريطة بصرية تفاعلية للأخطاء' if is_ar else '🎯 Precise Visual Map')
     html = html.replace('USE_F2P', 'عرض خريطة تفاعلية تومض باللون الأحمر فوق أماكن المشاكل.' if is_ar else 'Flashing red map over fixed coordinates.')
     html = html.replace('USE_FOOTER', 'جميع الحقوق محفوظة © 2026 منصة DXF Fixer.' if is_ar else 'All Rights Reserved © 2026 DXF Fixer.')
-    html = html.replace('USE_ALIGN', 'right' if is_ar else 'left').replace('<!-- PRICING_TABLE_PLACEHOLDER -->', pricing_table + t_btn)
+    html = html.replace('USE_ALIGN', 'right' if is_ar else 'left').replace('<!-- PRICING_TABLE_PLACEHOLDER -->', p_table + t_btn)
     return render_template_string(html)
 if __name__ == '__main__':
     app.run(debug=True)
-
-                   
-  
