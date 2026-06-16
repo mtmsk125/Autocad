@@ -1,8 +1,9 @@
-from flask import Flask, request, send_file, Response, session
+
+    from flask import Flask, request, send_file, Response, session
 import ezdxf, os, sqlite3, datetime
 
 app = Flask(__name__)
-app.secret_key = "moawia_secret_cnc_key_2026"
+app.secret_key = "moawia_gumroad_fully_auto_2026"
 DB_PATH = '/tmp/dxf_fixer.db'
 
 def init_db():
@@ -17,7 +18,7 @@ def download():
     filename = session.get('fixed_file', '')
     if not filename: return "No file session found / ارفع الملف مجدداً", 444
     p = os.path.join('/tmp', filename)
-    return send_file(p, as_attachment=True) if os.path.exists(p) else ("File expired on server", 404)
+    return send_file(p, as_attachment=True) if os.path.exists(p) else ("File expired", 404)
 
 @app.route('/admin_moawia', methods=['GET', 'POST'])
 def admin():
@@ -61,8 +62,7 @@ def index():
         cd = os.path.dirname(os.path.abspath(__file__))
         with open(os.path.join(cd, 'index.html'), 'r', encoding='utf-8') as f_obj: html = f_obj.read()
     except: return "index.html missing", 500
-    return Response(html.replace('USE_RESULT', res).replace('USE_DOWNLOAD_URL', '/download').replace('USE_JS_PTS', str(pts)), mimetype='text/html')
+    return Response(html.replace('USE_RESULT', res).replace('USE_JS_PTS', str(pts)), mimetype='text/html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-
