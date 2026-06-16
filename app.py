@@ -37,8 +37,8 @@ def index():
                         errors += 1
                         e.close()
                         if len(e) > 0:
-                            p = e.get_points()
-                            js_pts.append({"x": float(p), "y": float(p)})
+                            p = e.get_points()[0]
+                            js_pts.append({"x": float(p[0]), "y": float(p[1])})
                     elif e.dxftype() == 'LINE':
                         errors += 1
                         js_pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
@@ -57,16 +57,18 @@ def index():
         except Exception as e:
             result = f'<div class="error-card">⚠️ Error: {str(e)}</div>'
 
-    # قراءة الواجهة يدوياً من نفس المجلد لحل مشكلة قوالب جينجا وسجل الأخطاء
+    # قراءة ملف index.html المستقل والمتواجد بجانب الكود الرئيسي مباشرة
     try:
-        with open('index.html', 'r', encoding='utf-8') as f:
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        html_path = os.path.join(current_dir, 'index.html')
+        with open(html_path, 'r', encoding='utf-8') as f:
             html_template = f.read()
     except FileNotFoundError:
-        return "File index.html missing / ملف الواجهة مفقود", 500
+        return "File index.html missing / ملف الواجهة مفقود في المسار الرئيسي", 500
 
     download_url = f"/download/{fixed_filename}" if fixed_filename else "#"
     
-    # استبدال برمجي نقي وآمن مئة بالمئة يضمن عدم توقف السيرفر
+    # دمج البيانات مع الواجهة المستقلة وتخصيص النصوص بالكامل
     html_template = html_template.replace('USE_RESULT', result)
     html_template = html_template.replace('USE_DOWNLOAD_URL', download_url)
     html_template = html_template.replace('USE_JS_PTS', str(js_pts))
@@ -93,5 +95,3 @@ def index():
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-      
