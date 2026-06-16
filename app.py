@@ -1,5 +1,5 @@
 from flask import Flask, request, send_file, render_template_string
-import urllib.request, ezdxf, os, sqlite3, datetime
+import ezdxf, os, sqlite3, datetime
 
 app = Flask(__name__)
 DB_PATH = '/tmp/dxf_fixer.db'
@@ -14,7 +14,7 @@ init_db()
 @app.route('/download/<filename>')
 def download(filename):
     p = os.path.join('/tmp', filename)
-    return send_file(p, as_attachment=True) if os.path.exists(p) else ("File not found", 404)
+    return send_file(p, as_attachment=True) if os.path.exists(p) else ("Not found", 404)
 
 @app.route('/admin_moawia', methods=['GET', 'POST'])
 def admin():
@@ -28,7 +28,6 @@ def admin():
             with sqlite3.connect(DB_PATH) as conn:
                 conn.execute('INSERT OR REPLACE INTO codes VALUES (?,?,?)', (c, exp, o))
             msg = f'✓ تم إضافة الكود {c} بنجاح وينتهي بتاريخ {exp}'
-            
     with sqlite3.connect(DB_PATH) as conn:
         rows = conn.execute('SELECT * FROM codes').fetchall()
     table_rows = ''.join([f'<tr><td>{r[0]}</td><td>{r[1]}</td><td>{r[2]}</td></tr>' for r in rows])
@@ -52,10 +51,8 @@ def check_promo():
     with sqlite3.connect(DB_PATH) as conn:
         row = conn.execute('SELECT expires FROM codes WHERE code = ?', (user_code,)).fetchone()
     if row:
-        exp_date = datetime.datetime.strptime(row[0], '%Y-%m-%d')
-        if datetime.datetime.now() <= exp_date: return "VALID"
+        if datetime.datetime.now() <= datetime.datetime.strptime(row[0], '%Y-%m-%d'): return "VALID"
     return "INVALID"
-
 @app.route('/', methods=['GET', 'POST'])
 def index():
     res, f_name, pts = '', '', []
@@ -85,8 +82,7 @@ def index():
                     err += 1
                     e.close()
                     points = e.get_points()
-                    if points and len(points) > 0:
-                        pts.append({"x": float(points[0][0]), "y": float(points[0][1])})
+                    if points and len(points) > 0: pts.append({"x": float(points[0][0]), "y": float(points[0][1])})
                 elif e.dxftype() == 'LINE':
                     err += 1
                     pts.append({"x": float(e.dxf.start.x), "y": float(e.dxf.start.y)})
@@ -94,32 +90,42 @@ def index():
             doc.saveas(os.path.join('/tmp', f_name))
             if os.path.exists(fpath): os.remove(fpath)
             if err == 0:
-                if is_ar: res = f'<div id="result-section" class="rc"><div class="success-icon">✓</div><h3>ملفك سليم ومثالي 100%!</h3><p class="notice-text" style="color:#15803d;">المخطط سليم وجاهز للقص، يمكنك تحميله مجاناً كهدية.</p><a href="/download/{f_name}" class="btn-d" style="display:block; text-decoration:none; line-height:45px; background:#2563eb;">تحميل مجاناً 📥</a></div>'
-                else: res = f'<div id="result-section" class="rc"><div class="success-icon">✓</div><h3>Your File is Clean!</h3><a href="/download/{f_name}" class="btn-d" style="display:block; text-decoration:none; line-height:45px; background:#2563eb;">Download Free 📥</a></div>'
+                if is_ar: res = f'<div id="result-section" class="rc"><div class="success-icon">✓</div><h3>ملفك سليم ومثالي 100%!</h3><p style="color:#15803d;">المخطط سليم وجاهز، يمكنك تحميله مجاناً كهدية.</p><a href="/download/{f_name}" class="btn" style="display:block; text-decoration:none; line-height:45px; background:#2563eb;">تحميل مجاناً 📥</a></div>'
+                else: res = f'<div id="result-section" class="rc"><div class="success-icon">✓</div><h3>Your File is Clean!</h3><a href="/download/{f_name}" class="btn" style="display:block; text-decoration:none; line-height:45px; background:#2563eb;">Download Free 📥</a></div>'
             else:
-                if is_ar: res = f'<div id="result-section" class="rc"><div class="success-icon" style="background:#f59e0b;">!</div><h3>تم الإصلاح التلقائي بنجاح!</h3><div class="error-counter">الأخطاء المصلحة: <strong>{err}</strong></div><button type="button" onclick="openPaymentModal()" class="btn-d">تحميل ملف DXF السليم الآن 🚀</button></div>'
-                else: res = f'<div id="result-section" class="rc"><div class="success-icon" style="background:#f59e0b;">!</div><h3>Scan Completed!</h3><div class="error-counter">Errors Fixed: <strong>{err}</strong></div><button type="button" onclick="openPaymentModal()" class="btn-d">Download Fixed DXF Now 🚀</button></div>'
+                if is_ar: res = f'<div id="result-section" class="rc"><div class="success-icon" style="background:#f59e0b;">!</div><h3>تم الإصلاح التلقائي بنجاح!</h3><div class="error-counter">الأخطاء المصلحة: <strong>{err}</strong></div><button type="button" onclick="openPaymentModal()" class="btn" style="background:#10b981;margin-top:10px;">تحميل ملف DXF السليم الآن 🚀</button></div>'
+                else: res = f'<div id="result-section" class="rc"><div class="success-icon" style="background:#f59e0b;">!</div><h3>Scan & Auto-Fix Completed!</h3><div class="error-counter">Errors Fixed: <strong>{err}</strong></div><button type="button" onclick="openPaymentModal()" class="btn" style="background:#10b981;margin-top:10px;">Download Fixed DXF Now 🚀</button></div>'
         except Exception as e: res = f'<div class="ec">⚠️ Error: {str(e)}</div>'
     
-    # استدعاء آمن ومحمي 100% للواجهة الفخمة والمكتملة بالكامل من السيرفر السحابي لمنع القص للأبد
-    try:
-        req = urllib.request.Request("https://pastebin.com", headers={'User-Agent': 'Mozilla/5.0'})
-        html = urllib.request.urlopen(req, timeout=5).read().decode('utf-8')
-    except:
-        return "Server Template Missing / خطأ في تحميل الواجهة", 500
-
     d_url = f"/download/{f_name}" if f_name else "#"
+    dir_attr = "rtl" if is_ar else "ltr"
+    align = "right" if is_ar else "left"
+    h_t = "منصة DXF Fixer" if is_ar else "DXF Fixer Platform"
+    h_1 = "إصلاح وتنظيف ملفات DXF تلقائياً بضغطة زر" if is_ar else "Auto-Fix DXF Files Instantly"
+    h_p = "تكتشف منصتنا الأخطاء وتجهز ملفك للقص الفوري وبأعلى دقة." if is_ar else "Our platform preps your file for cutting."
+    lbl = "اسحب ملف DXF هنا أو اضغط للتصفح" if is_ar else "Drag & Drop DXF file here"
+    btn = "ابدأ الفحص والإصلاح تلقائياً" if is_ar else "Start Auto-Repair"
+    mh3 = "🔓 خطوة واحدة لتنزيل ملفك السليم" if is_ar else "🔓 One Quick Step to Download"
+    mp = "يرجى تحويل قيمة الخدمة (1 دينار محلي / أو $2 للأجانب) عبر كليك لتفعيل التحميل:" if is_ar else "Please transfer the fee ($2 USD / 1 JOD) via CliQ to unlock:"
     
-    # دمج البيانات والترجمات بأمان وشفافية داخل القالب
+    p_table = f'''<div class="pricing-container"><h3 class="pricing-title">{"💎 خطط التحميل والاشتراك لورشتك" if is_ar else "💎 Choose Best Plan"}</h3><div class="pricing-grid">
+    <div class="price-card"><h5>{"الملف الواحد" if is_ar else "Single File"}</h5><div class="price">{"1 د.أ" if is_ar else "$2.00"}</div><button onclick="openPaymentModal()" class="btn-price">{"دفع ملف" if is_ar else "Pay File"}</button></div>
+    <div class="price-card popular"><div class="badge">{"الأكثر طلباً" if is_ar else "Popular"}</div><h5>{"الاشتراك الشهري" if is_ar else "Monthly Plan"}</h5><div class="price">{"10 د.أ" if is_ar else "$15.00"}</div><p>{"ملفات غير محدودة" if is_ar else "Unlimited files"}</p><a href="https://wa.me" target="_blank" class="btn-price" style="background:var(--p);color:#fff;text-decoration:none;display:block;">{"واتساب" if is_ar else "Subscribe"}</a></div>
+    <div class="price-card"><h5>{"الاشتراك السنوي" if is_ar else "Annual Plan"}</h5><div class="price">{"70 د.أ" if is_ar else "$99.00"}</div><a href="https://wa.me" target="_blank" class="btn-price" style="text-decoration:none;display:block;">{"تفعيل" if is_ar else "Get Annual"}</a></div>
+    </div></div>'''
+    
+    t_btn = f'''<div style="margin-top:20px;"><a href="/?test_mode=1" style="color:var(--p);font-weight:600;text-decoration:none;font-size:14px;">⚙️ {"اضغط هنا لتوليد ملف تالف واختبار خريطة الأخطاء والأسعار فوراً" if is_ar else "Click here to generate a broken file and test instantly"}</a></div>'''
+
+    try:
+        cd = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(cd, 'index.html'), 'r', encoding='utf-8') as f_obj: html = f_obj.read()
+    except: return "index.html missing", 500
+
     html = html.replace('USE_RESULT', res).replace('USE_DOWNLOAD_URL', d_url).replace('USE_JS_PTS', str(pts))
-    html = html.replace('USE_DIR', 'rtl' if is_ar else 'ltr').replace('USE_LANG', 'ar' if is_ar else 'en')
+    html = html.replace('USE_DIR', dir_attr).replace('USE_LANG', 'ar' if is_ar else 'en')
     html = html.replace('USE_NAV', '🚀 منصة DXF Fixer الذكية للـ CNC' if is_ar else '🚀 DXF Fixer Platform')
-    html = html.replace('USE_H1', 'إصلاح وتنظيف ملفات DXF تلقائياً بضغطة زر' if is_ar else 'Auto-Fix DXF Files Instantly')
-    html = html.replace('USE_P', 'تكتشف منصتنا الأخطاء وتجهز ملفك للقص الفوري.' if is_ar else 'Our platform preps your file for cutting.')
-    html = html.replace('USE_LBL', 'اسحب ملف DXF هنا أو اضغط للتصفح' if is_ar else 'Drag & Drop DXF file here')
-    html = html.replace('USE_BTN', 'ابدأ الفحص والإصلاح تلقائياً' if is_ar else 'Start Auto-Repair')
-    html = html.replace('USE_MH3', '🔓 خطوة واحدة لتنزيل ملفك السليم' if is_ar else '🔓 One Quick Step to Download')
-    html = html.replace('USE_MP', 'يرجى تحويل قيمة الخدمة (1 دينار محلي / أو $2 للأجانب) عبر كليك لتفعيل التحميل:' if is_ar else 'Please transfer the fee ($2 USD / 1 JOD) via CliQ to unlock:')
+    html = html.replace('USE_H1', h_1).replace('USE_P', h_p).replace('USE_LBL', lbl).replace('USE_BTN', btn)
+    html = html.replace('USE_MH3', mh3).replace('USE_MP', mp)
     html = html.replace('USE_VLBL', 'أدخل اسم المحوِّل للتأكيد التلقائي والتنزيل:' if is_ar else 'Enter sender name to verify:')
     html = html.replace('USE_VPH', 'مثال: محمد أحمد / 079xxxxxxx' if is_ar else 'e.g., John Doe')
     html = html.replace('USE_VBTN', 'تأكيد وتحميل الملف فوراً 📥' if is_ar else 'Confirm & Download 📥')
@@ -128,8 +134,12 @@ def index():
     html = html.replace('USE_F2H', '🎯 خريطة بصرية تفاعلية للأخطاء' if is_ar else '🎯 Precise Visual Map')
     html = html.replace('USE_F2P', 'عرض خريطة تفاعلية تومض باللون الأحمر فوق أماكن المشاكل.' if is_ar else 'Flashing red map over fixed coordinates.')
     html = html.replace('USE_FOOTER', 'جميع الحقوق محفوظة © 2026 منصة DXF Fixer.' if is_ar else 'All Rights Reserved © 2026 DXF Fixer.')
-    html = html.replace('USE_ALIGN', 'right' if is_ar else 'left')
+    html = html.replace('USE_ALIGN', align).replace('<!-- PRICING_TABLE_PLACEHOLDER -->', p_table + t_btn)
     return render_template_string(html)
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+    
+    
+    
