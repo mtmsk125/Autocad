@@ -1,4 +1,4 @@
-from flask import Flask, request, send_file, render_template_string
+from flask import Flask, request, send_file, render_template
 import ezdxf
 import os
 
@@ -14,6 +14,8 @@ def download(filename):
 @app.route('/', methods=['GET', 'POST'])
 def index():
     result = ''
+    fixed_filename = ''
+    
     if request.method == 'POST':
         try:
             file = request.files.get('dxf_file')
@@ -63,17 +65,10 @@ def index():
         except Exception as e:
             result = f'<div id="result-section" class="error-card">⚠️ خطأ أثناء المعالجة: {str(e)}</div>'
 
-    # قراءة واجهة الموقع من ملف index.html المنفصل
-    try:
-        with open('index.html', 'r', encoding='utf-8') as f:
-            html_template = f.read()
-    except FileNotFoundError:
-        return "ملف index.html غير موجود. يرجى إنشاؤه بجانب ملف app.py", 500
-
-    download_url = f"/download/{fixed_filename}" if request.method == 'POST' and 'fixed_filename' in locals() else "#"
+    download_url = f"/download/{fixed_filename}" if fixed_filename else "#"
     
-    # دمج النتيجة ورابط التحميل داخل واجهة الموقع
-    return render_template_string(html_template, result=result, download_url=download_url)
+    # استدعاء ملف index.html الاحترافي المباشر من مجلد templates
+    return render_template('index.html', result=result, download_url=download_url)
 
 if __name__ == '__main__':
     app.run(debug=True)
