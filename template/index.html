@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DXF Fixer</title>
+
+<style>
+body{
+    margin:0;
+    font-family:sans-serif;
+    background:linear-gradient(135deg,#0f172a,#1e293b);
+    color:white;
+}
+
+/* HERO */
+.hero{
+    text-align:center;
+    padding:90px 20px;
+}
+
+.hero h1{
+    font-size:42px;
+}
+
+.hero p{
+    color:#cbd5e1;
+}
+
+/* UPLOAD BOX */
+.box{
+    background:white;
+    color:black;
+    max-width:500px;
+    margin:auto;
+    padding:30px;
+    border-radius:15px;
+    box-shadow:0 10px 30px rgba(0,0,0,0.3);
+}
+
+input,button{
+    width:100%;
+    padding:12px;
+    margin-top:10px;
+    border-radius:8px;
+}
+
+button{
+    background:#22c55e;
+    border:none;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+/* FEATURES */
+.features{
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    flex-wrap:wrap;
+    margin-top:40px;
+}
+
+.card{
+    background:rgba(255,255,255,0.1);
+    padding:15px;
+    border-radius:10px;
+    width:200px;
+}
+
+/* WHATSAPP */
+.wa{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+    background:#25D366;
+    padding:14px 16px;
+    border-radius:50px;
+    text-decoration:none;
+    color:white;
+    font-weight:bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="hero">
+    <h1>DXF Fixer for CNC Workshops</h1>
+    <p>Repair • Score • Validate DXF Files Instantly</p>
+</div>
+
+<div class="box">
+    <h3>Upload DXF File</h3>
+
+    <form action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button>Analyze & Fix</button>
+    </form>
+</div>
+
+<div class="features">
+    <div class="card">⚙ Auto Repair Engine</div>
+    <div class="card">📊 CNC Score System</div>
+    <div class="card">📄 Instant Output</div>
+</div>
+
+<!-- WhatsApp -->
+<a class="wa" href="https://wa.me/9627XXXXXXXX">
+WhatsApp Support
+</a>
+
+</body>
+</html>
