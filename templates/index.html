@@ -1,29 +1,33 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
 <meta charset="UTF-8">
-<title>DXF Fixer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DXF Fixer - CNC File Optimization</title>
 
 <style>
 body{
     margin:0;
-    font-family:sans-serif;
-    background:linear-gradient(135deg,#0f172a,#1e293b);
+    font-family: sans-serif;
+    background: linear-gradient(135deg,#0f172a,#1e293b);
     color:white;
 }
 
 /* HERO */
 .hero{
     text-align:center;
-    padding:90px 20px;
+    padding:90px 20px 40px 20px;
 }
 
 .hero h1{
     font-size:42px;
+    margin-bottom: 10px;
 }
 
 .hero p{
     color:#cbd5e1;
+    font-size: 18px;
+    margin: 5px 0;
 }
 
 /* UPLOAD BOX */
@@ -37,19 +41,39 @@ body{
     box-shadow:0 10px 30px rgba(0,0,0,0.3);
 }
 
-input,button{
-    width:100%;
-    padding:12px;
-    margin-top:10px;
-    border-radius:8px;
+.box h3{
+    margin-top: 0;
+    margin-bottom: 20px;
+    text-align: center;
 }
 
-button{
+input, button, .btn-plan{
+    box-sizing: border-box;
+    width:100%;
+    padding:14px;
+    margin-top:10px;
+    border-radius:8px;
+    font-size: 16px;
+}
+
+input[type="file"] {
+    border: 1px dashed #cbd5e1;
+    background: #f8fafc;
+    cursor: pointer;
+}
+
+button, .btn-plan{
     background:#22c55e;
     border:none;
     color:white;
     font-weight:bold;
     cursor:pointer;
+    transition: background 0.2s;
+    text-align: center;
+}
+
+button:hover, .btn-plan:hover{
+    background:#16a34a;
 }
 
 /* FEATURES */
@@ -59,13 +83,139 @@ button{
     gap:20px;
     flex-wrap:wrap;
     margin-top:40px;
+    padding: 0 20px;
 }
 
 .card{
     background:rgba(255,255,255,0.1);
-    padding:15px;
+    padding:20px;
     border-radius:10px;
-    width:200px;
+    width:220px;
+    text-align: center;
+    font-size: 15px;
+}
+
+/* PRICING SECTION */
+.pricing-section {
+    max-width: 900px;
+    margin: 80px auto 40px auto;
+    padding: 0 20px;
+    text-align: center;
+}
+
+.pricing-grid {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+
+.pricing-card {
+    background: rgba(30, 41, 59, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 30px;
+    width: 280px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.pricing-card.popular {
+    border: 2px solid #22c55e;
+    position: relative;
+}
+
+.badge {
+    position: absolute;
+    top: -12px;
+    right: 20px;
+    background: #22c55e;
+    color: white;
+    font-size: 11px;
+    font-weight: bold;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+.pricing-card h4 {
+    margin: 0 0 10px 0;
+    font-size: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.arabic-label {
+    font-size: 12px;
+    background: rgba(255,255,255,0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: #cbd5e1;
+}
+
+.price {
+    font-size: 36px;
+    font-weight: bold;
+    margin: 15px 0;
+}
+
+.price span {
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.pricing-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 30px 0;
+    font-size: 14px;
+    color: #cbd5e1;
+    line-height: 2;
+}
+
+/* FOOTER */
+footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 23, 42, 0.8);
+    padding: 30px 20px;
+    margin-top: 80px;
+    text-align: center;
+    font-size: 14px;
+    color: #94a3b8;
+}
+
+.footer-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    display: flex;
+    flex-col: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+@media (min-width: 640px) {
+    .footer-container { flex-direction: row; }
+}
+
+.footer-links {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.footer-links a {
+    color: #94a3b8;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.footer-links a:hover {
+    color: #22c55e;
 }
 
 /* WHATSAPP */
@@ -79,6 +229,8 @@ button{
     text-decoration:none;
     color:white;
     font-weight:bold;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 100;
 }
 </style>
 </head>
@@ -88,27 +240,81 @@ button{
 <div class="hero">
     <h1>DXF Fixer for CNC Workshops</h1>
     <p>Repair • Score • Validate DXF Files Instantly</p>
+    <p dir="rtl" style="font-size: 15px; color: #94a3b8;">إصلاح، وفحص، وتجهيز ملفات DXF لورش ومصانع CNC فوراً</p>
 </div>
 
 <div class="box">
-    <h3>Upload DXF File</h3>
+    <h3 dir="rtl">Upload DXF File / رفع الملف</h3>
 
     <form action="/upload" method="post" enctype="multipart/form-data">
         <input type="file" name="file" required>
-        <button>Analyze & Fix</button>
+        <button type="submit">Analyze & Fix / فحص وإصلاح ⚡</button>
     </form>
 </div>
 
 <div class="features">
-    <div class="card">⚙ Auto Repair Engine</div>
-    <div class="card">📊 CNC Score System</div>
-    <div class="card">📄 Instant Output</div>
+    <div class="card">⚙️ Auto Repair Engine<br><span dir="rtl" style="font-size:12px; color:#94a3b8;">محرك إصلاح تلقائي</span></div>
+    <div class="card">📊 CNC Score System<br><span dir="rtl" style="font-size:12px; color:#94a3b8;">نظام تقييم الملفات</span></div>
+    <div class="card">📄 Instant Output<br><span dir="rtl" style="font-size:12px; color:#94a3b8;">استخراج فوري للملف</span></div>
 </div>
 
-<!-- WhatsApp -->
-<a class="wa" href="https://wa.me/9627XXXXXXXX">
+<!-- Required Pricing Section for Paddle -->
+<section class="pricing-section">
+    <h2>Pricing Plans / باقات الاشتراك</h2>
+    <p style="color: #94a3b8;">Select a plan to process and optimize unlimited industrial files</p>
+    
+    <div class="pricing-grid">
+        <!-- Plan 1 -->
+        <div class="pricing-card">
+            <div>
+                <h4>Starter <span class="arabic-label" dir="rtl">الباقة الأساسية</span></h4>
+                <p style="color: #94a3b8; font-size: 13px; margin: 0;">Perfect for small workshops.</p>
+                <div class="price">$19 <span>/ month</span></div>
+                <ul class="border-t border-gray-800 pt-4">
+                    <li>✓ Process up to 50 DXF files / mo</li>
+                    <li>✓ Standard geometric repair</li>
+                    <li>✓ Email Technical Support</li>
+                </ul>
+            </div>
+            <a href="#" class="btn-plan" style="text-decoration: none;">Subscribe</a>
+        </div>
+
+        <!-- Plan 2 -->
+        <div class="pricing-card popular">
+            <span class="badge">POPULAR / الأكثر طلباً</span>
+            <div>
+                <h4>Workshop Pro <span class="arabic-label" dir="rtl">باقة المحترفين</span></h4>
+                <p style="color: #94a3b8; font-size: 13px; margin: 0;">For heavy industrial CNC workloads.</p>
+                <div class="price">$49 <span>/ month</span></div>
+                <ul class="border-t border-gray-800 pt-4">
+                    <li>✓ Unlimited DXF File Processing</li>
+                    <li>✓ Premium nested curve optimization</li>
+                    <li>✓ Priority 24/7 Support</li>
+                </ul>
+            </div>
+            <a href="#" class="btn-plan" style="text-decoration: none;">Subscribe</a>
+        </div>
+    </div>
+</section>
+
+<!-- Required Footer Links for Paddle Verification -->
+<footer>
+    <div class="footer-container">
+        <div>© 2026 DXF Fixer. All rights reserved.</div>
+        <div class="footer-links">
+            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms of Service</a>
+            <a href="/refund">Refund Policy</a>
+            <a href="/contact">Contact Us</a>
+        </div>
+    </div>
+</footer>
+
+<!-- WhatsApp Support -->
+<a class="wa" href="https://wa.me/9627XXXXXXXX" target="_blank">
 WhatsApp Support
 </a>
 
 </body>
 </html>
+
