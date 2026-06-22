@@ -70,6 +70,8 @@ button, .btn-plan{
     cursor:pointer;
     transition: background 0.2s;
     text-align: center;
+    display: block;
+    text-decoration: none;
 }
 
 button:hover, .btn-plan:hover{
@@ -191,7 +193,7 @@ footer {
     max-width: 1000px;
     margin: 0 auto;
     display: flex;
-    flex-col: column;
+    flex-direction: column;
     justify-content: space-between;
     align-items: center;
     gap: 20px;
@@ -276,7 +278,8 @@ footer {
                     <li>✓ Email Technical Support</li>
                 </ul>
             </div>
-            <a href="#" class="btn-plan" style="text-decoration: none;">Subscribe</a>
+            <!-- تم ربط حدث الضغط برمجياً بالدالة السفلية -->
+            <button onclick="openCheckout('pri_YOUR_STARTER_PRICE_ID')" class="btn-plan">Subscribe</button>
         </div>
 
         <!-- Plan 2 -->
@@ -292,7 +295,8 @@ footer {
                     <li>✓ Priority 24/7 Support</li>
                 </ul>
             </div>
-            <a href="#" class="btn-plan" style="text-decoration: none;">Subscribe</a>
+            <!-- تم ربط حدث الضغط برمجياً بالدالة السفلية -->
+            <button onclick="openCheckout('pri_YOUR_PRO_PRICE_ID')" class="btn-plan">Subscribe</button>
         </div>
     </div>
 </section>
@@ -314,6 +318,32 @@ footer {
 <a class="wa" href="https://wa.me/9627XXXXXXXX" target="_blank">
 WhatsApp Support
 </a>
+
+<!-- استدعاء مكتبة Paddle وتهيئة الأزرار قبل إغلاق الـ body -->
+<script src="https://paddle.com"></script>
+<script>
+  // تهيئة اتصال الـ SDK الخاص بالمنصة
+  Paddle.initialize({ 
+    token: "YOUR_CLIENT_SIDE_TOKEN" 
+  });
+
+  // دالة فتح نافذة الـ Checkout عند الضغط
+  function openCheckout(priceId) {
+    Paddle.Checkout.open({
+      items: [
+        {
+          priceId: priceId,
+          quantity: 1
+        }
+      ],
+      settings: {
+        displayMode: "overlay",
+        theme: "dark",
+        locale: "en"
+      }
+    });
+  }
+</script>
 
 </body>
 </html>
