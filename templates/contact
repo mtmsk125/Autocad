@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - DXF Fixer</title>
+    <script src="https://tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen py-12 px-4">
+    <div class="max-w-2xl mx-auto bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-700 text-center">
+        <h1 class="text-3xl font-bold mb-4 text-emerald-400">Contact Us</h1>
+        <p class="text-slate-300 mb-8">Have questions or need technical assistance with your CNC files? Reach out to us.</p>
+        
+        <div class="bg-slate-900 p-6 rounded-xl border border-slate-700 inline-block text-left mx-auto space-y-3 w-full max-w-md">
+            <p><strong class="text-white">Customer Support Email:</strong> <a href="mailto:mtmsk125@yahoo.com" class="text-emerald-400 hover:underline">mtmsk125@yahoo.com</a></p>
+            <p><strong class="text-white">Operational Hours:</strong> Sunday – Thursday, 9:00 AM – 5:00 PM (GMT+3)</p>
+            <p><strong class="text-white">Response Guarantee:</strong> Within 24-48 business hours</p>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-slate-700">
+            <a href="/" class="text-emerald-400 hover:underline">← Back to Main App</a>
+        </div>
+    </div>
+</body>
+</html>
