@@ -266,7 +266,7 @@ footer {
     <p style="color: #94a3b8;">Select a plan to process and optimize unlimited industrial files</p>
     
     <div class="pricing-grid">
-        <!-- Plan 1 -->
+        <!-- Plan 1 (Starter) -->
         <div class="pricing-card">
             <div>
                 <h4>Starter <span class="arabic-label" dir="rtl">الباقة الأساسية</span></h4>
@@ -278,11 +278,11 @@ footer {
                     <li>✓ Email Technical Support</li>
                 </ul>
             </div>
-            <!-- تم ربط حدث الضغط برمجياً بالدالة السفلية -->
-            <button onclick="openCheckout('pri_YOUR_STARTER_PRICE_ID')" class="btn-plan">Subscribe</button>
+            <!-- ✅ تم دمج معرف باقة السيرفر الأولى بنجاح -->
+            <button onclick="openCheckout('pri_01kwe9yxzj0n4njwbncmgt8he0')" class="btn-plan">Subscribe</button>
         </div>
 
-        <!-- Plan 2 -->
+        <!-- Plan 2 (Workshop Pro) -->
         <div class="pricing-card popular">
             <span class="badge">POPULAR / الأكثر طلباً</span>
             <div>
@@ -295,8 +295,8 @@ footer {
                     <li>✓ Priority 24/7 Support</li>
                 </ul>
             </div>
-            <!-- تم ربط حدث الضغط برمجياً بالدالة السفلية -->
-            <button onclick="openCheckout('pri_YOUR_PRO_PRICE_ID')" class="btn-plan">Subscribe</button>
+            <!-- ✅ تم دمج معرف باقة السيرفر الثانية بنجاح -->
+            <button onclick="openCheckout('pri_01kwe9s2cv7fb2x854jkdshw8c')" class="btn-plan">Subscribe</button>
         </div>
     </div>
 </section>
@@ -315,16 +315,16 @@ footer {
 </footer>
 
 <!-- WhatsApp Support -->
-<a class="wa" href="https://wa.me/9627XXXXXXXX" target="_blank">
+<a class="wa" href="https://wa.me" target="_blank">
 WhatsApp Support
 </a>
 
-<!-- استدعاء مكتبة Paddle وتهيئة الأزرار قبل إغلاق الـ body -->
+<!-- استدعاء ملف الـ CDN الصحيح والمحدث لـ Paddle v2 -->
 <script src="https://paddle.com"></script>
 <script>
-  // تهيئة اتصال الـ SDK الخاص بالمنصة
-  Paddle.initialize({ 
-    token: "YOUR_CLIENT_SIDE_TOKEN" 
+  // تهيئة وتوثيق الاتصال بالمنصة عبر التوكن الحقيقي الخاص بك (Live Environment)
+  Paddle.Initialize({ 
+    token: "live_130ae2f79f39d81802e25940530" 
   });
 
   // دالة فتح نافذة الـ Checkout عند الضغط
@@ -347,4 +347,3 @@ WhatsApp Support
 
 </body>
 </html>
-
